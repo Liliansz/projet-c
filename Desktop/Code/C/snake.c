@@ -9,22 +9,25 @@
 
 /*--------- Déclaration de fonction ---------*/
 
-void afficher(int x, int y, int fruit_x, int fruit_y);
+struct Serpent{
+    int x[200];
+    int y[200];
+    int taille;
+    char direction;
+};
 
+void afficher(struct Serpent s, int fruit_x, int fruit_y);
 
 
 int main(){
     initscr();
-    curs_set(1);    //cache le curseur
+    curs_set(0);    //cache le curseur
     nodelay(stdscr, TRUE);  // serpent qui bouge sans attendre une touche
 
 
     /*---------Variables du serpent ---------*/
 
-    int x = LARGEUR / 2; 
-    int y = HAUTEUR / 2;
     int touche;
-    char direction = 'd';   //démarre vers la droite
     int en_jeu = 1;     /* 1 = jeu en cours, 0 = game over */ 
 
     /* Initialisation du générateur aléatoire */
@@ -33,6 +36,13 @@ int main(){
     /* Position du fruit à l'intérieur des murs donc entre 1 et LARGEUR - 1 */
     int fruit_x = rand() % (LARGEUR - 1) + 1;
     int fruit_y = rand() % (HAUTEUR - 1) + 1;
+
+
+    struct Serpent s;
+    s.taille = 1;
+    s.direction = 'd';
+    s.x[0] = LARGEUR / 2;
+    s.y[0] = HAUTEUR / 2;
 
 
     /*--------- Boucle principale du jeu ---------*/
@@ -45,39 +55,48 @@ int main(){
 
         /*2. Changer la direction*/
         if (touche == 'z'){
-            direction = 'z';
+            s.direction = 'z';
         }
         else if (touche == 'd'){
-            direction = 'd';
+            s.direction = 'd';
         }
         else if (touche == 's'){
-            direction = 's';
+            s.direction = 's';
         }
         else if (touche == 'q'){
-            direction = 'q';
+            s.direction = 'q';
         }
         else if (touche == 'x'){
             en_jeu = 0;     /* quitter */
         }
 
 
+
+        /* Déplacement du corps (chaque segment suit le précédent) */
+        for (int i = s.taille - 1; i > 0; i--) {
+            s.x[i] = s.x[i-1];
+            s.y[i] = s.y[i-1];
+        }
+
         /*3. Déplacer le serpent*/
-        if(direction == 'z'){
-            y = y - 1;
+        if(s.direction == 'z'){
+            s.y[0] = s.y[0] - 1;
         }
-        if(direction == 's'){
-            y = y + 1;
+        if(s.direction == 's'){
+            s.y[0] = s.y[0] + 1;
         }
-        if(direction == 'q'){
-            x = x - 1;
+        if(s.direction == 'q'){
+            s.x[0] = s.x[0] - 1;
         }
-        if(direction == 'd'){
-            x = x + 1;
+        if(s.direction == 'd'){
+            s.x[0] = s.x[0] + 1;
         }
+
 
 
         /* Le serpent mange le fruit ? */
-        if(x == fruit_x && y == fruit_y){
+        if(s.x[0] == fruit_x && s.y[0] == fruit_y){
+            s.taille++;  /* le serpent grandit */
             /* Générer un nouveau fruit */
             fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et dnc etre dans le mur */
             fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
@@ -85,14 +104,14 @@ int main(){
 
 
         /* 4. Collision sur le mur */
-        if(x <= 0 || x >= LARGEUR || y <= 0 || y >= HAUTEUR){
+        if(s.x[0] <= 0 || s.x[0] >= LARGEUR || s.y[0] <= 0 || s.y[0] >= HAUTEUR){
             en_jeu = 0;     /* game over */
         }
 
 
         /*5. Afficher*/
         if(en_jeu){
-            afficher(x, y, fruit_x, fruit_y);
+            afficher(s, fruit_x, fruit_y);
             usleep(100000); /* Vitesse du jeu, on attend un peu avant chaque frame*/
         }
     }
@@ -106,7 +125,7 @@ int main(){
 
 /*--------- Définition de fonction ---------*/
 
-void afficher(int x, int y, int fruit_x, int fruit_y){
+void afficher(struct Serpent s, int fruit_x, int fruit_y){
     clear();    // efface l'ancien affichage
 
     int i;
@@ -122,9 +141,14 @@ void afficher(int x, int y, int fruit_x, int fruit_y){
         mvprintw(i, 0, "#");        /* mur de gauche */
         mvprintw(i, LARGEUR, "#");  /* mur de droite */
     }
+    
+    mvprintw(fruit_y, fruit_x, "*");    // Affiche le fruit
 
-    mvprintw(fruit_y, fruit_x, "*");    // Afficher le fruit
-    mvprintw(y, x, "O");    // On affiche le serpent
+    mvprintw(s.y[0], s.x[0], "O");    // On affiche le serpent
+    for(i = 1; i < s.taille; i++){
+        mvprintw(s.y[i], s.x[i], "o");
+    }
+
     refresh();  // On envoie l'affichage à l'écran
 }
 
@@ -137,7 +161,6 @@ void afficher(int x, int y, int fruit_x, int fruit_y){
 
 
 /* Ce qu'il reste à faire : 
-        - Le corps du serpent qui se crée [tab x struct]
         - il ne peux pas faire d'aller-retours
         - Game over si le serpent se mord lui même
         - Le score
