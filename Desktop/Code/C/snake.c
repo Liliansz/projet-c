@@ -53,7 +53,7 @@ int main(){
         touche = getch();
 
 
-        /*2. Changer la direction*/
+        /*2. Changer la direction quand tu appuies sur le bouton*/
         if (touche == 'z'){
             s.direction = 'z';
         }
@@ -69,7 +69,7 @@ int main(){
         else if (touche == 'x'){
             en_jeu = 0;     /* quitter */
         }
-
+        
 
 
         /* Déplacement du corps (chaque segment suit le précédent) */
@@ -78,7 +78,7 @@ int main(){
             s.y[i] = s.y[i-1];
         }
 
-        /*3. Déplacer le serpent*/
+        /*3. Déplacer le serpent en continu*/
         if(s.direction == 'z'){
             s.y[0] = s.y[0] - 1;
         }
@@ -161,6 +161,7 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y){
 
 
 /* Ce qu'il reste à faire : 
+        - Le corps du serpent qui se crée [tab x struct]
         - il ne peux pas faire d'aller-retours
         - Game over si le serpent se mord lui même
         - Le score
