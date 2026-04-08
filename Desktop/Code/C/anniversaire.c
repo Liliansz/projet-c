@@ -27,7 +27,7 @@ int saisir_tab_etudiants(struct etudiant tab[], int taille_max);
 void afficher_tab_etudiant(struct etudiant tab[], int taille);
 void tri_insertion(struct etudiant tab[], int taille);
 int anniversaires(struct etudiant tab[], int taille, struct anniv annivs[]);
-int indice_max_annivs(struct anniv annivs[], int nb_annivs)
+int indice_max_annivs(struct anniv annivs[], int nb_annivs);
 
 
 /* ----- LE MAIN -----*/
