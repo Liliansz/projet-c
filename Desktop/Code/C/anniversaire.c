@@ -63,22 +63,29 @@ void afficher_etudiant(struct etudiant e) {
 }
 
 // Question 2e : Saisie d'un étudiant
-struct etudiant saisir_etudiant() {
-    struct etudiant e;
-    printf("Nom : "); scanf("%s", e.nom);
-    printf("Prénom : "); scanf("%s", e.prenom);
-    printf("Jour de naissance : "); scanf("%d", &e.jour);
-    printf("Mois de naissance : "); scanf("%d", &e.mois);
-    return e;
+struct etudiant saisir_etudiant(){
+  struct etudiant e;
+  scanf("%s %s %d %d", e.nom, e.prenom, &e.jour, &e.mois);
+  return e;
 }
 
 // Question 3 : Comparaison de deux dates d'anniversaire
-int cmp_etudiants(struct etudiant e, struct etudiant f) {
-    if (e.mois < f.mois) return -1;
-    if (e.mois > f.mois) return 1;
-    if (e.jour < f.jour) return -1;
-    if (e.jour > f.jour) return 1;
-    return 0; // Même jour, même mois
+int cmp_etudiants(struct etudiant e, struct etudiant f){
+  if(e.mois < f.mois){
+    return -1;
+  }
+  else if(e.mois > f.mois){
+    return 1;
+  }
+  else {
+    if(e.jour < f.jour){
+      return -1;
+    }
+    if(e.jour > f.jour){
+      return 1;
+    }
+    return 0;  //Meme jour, meme mois
+  }
 }
 
 // Question 6 : Saisie d'un tableau (lecture depuis fichier/redirection)
