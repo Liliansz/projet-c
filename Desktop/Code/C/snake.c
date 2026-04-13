@@ -16,12 +16,13 @@ struct Serpent{
     char direction;
 };
 
-void afficher(struct Serpent s, int fruit_x, int fruit_y);
+
+void afficher(struct Serpent s, int fruit_x, int fruit_y, int score);
 
 
 int main(){
     initscr();
-    curs_set(0);    //cache le curseur
+    curs_set(0);            //cache le curseur
     nodelay(stdscr, TRUE);  // serpent qui bouge sans attendre une touche
 
 
@@ -30,6 +31,7 @@ int main(){
     int touche;
     int en_jeu = 1;     /* 1 = jeu en cours, 0 = game over */ 
 
+
     /* Initialisation du générateur aléatoire */
     srand(time(NULL));
 
@@ -37,6 +39,7 @@ int main(){
     int fruit_x = rand() % (LARGEUR - 1) + 1;
     int fruit_y = rand() % (HAUTEUR - 1) + 1;
 
+    int score = 0;
 
     struct Serpent s;
     s.taille = 1;
@@ -54,16 +57,16 @@ int main(){
 
 
         /*2. Changer la direction quand tu appuies sur le bouton*/
-        if (touche == 'z'){
+        if (touche == 'z' && s.direction != 's'){
             s.direction = 'z';
         }
-        else if (touche == 'd'){
+        else if (touche == 'd' && s.direction != 'q'){
             s.direction = 'd';
         }
-        else if (touche == 's'){
+        else if (touche == 's' && s.direction != 'z'){
             s.direction = 's';
         }
-        else if (touche == 'q'){
+        else if (touche == 'q' && s.direction != 'd'){
             s.direction = 'q';
         }
         else if (touche == 'x'){
@@ -97,8 +100,9 @@ int main(){
         /* Le serpent mange le fruit ? */
         if(s.x[0] == fruit_x && s.y[0] == fruit_y){
             s.taille++;  /* le serpent grandit */
+            score = score + 10;                     /*on ajoute 10 au score*/
             /* Générer un nouveau fruit */
-            fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et dnc etre dans le mur */
+            fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et donc etre dans le mur */
             fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
         }
 
@@ -108,10 +112,17 @@ int main(){
             en_jeu = 0;     /* game over */
         }
 
+        /*Collision avec soi-même*/
+        for (int i = 1; i < s.taille; i++){
+            if(s.x[0] == s.x[i] && s.y[0] == s.y[i]){
+                en_jeu = 0;
+            }
+        }
+
 
         /*5. Afficher*/
         if(en_jeu){
-            afficher(s, fruit_x, fruit_y);
+            afficher(s, fruit_x, fruit_y, score);
             usleep(100000); /* Vitesse du jeu, on attend un peu avant chaque frame*/
         }
     }
@@ -125,7 +136,7 @@ int main(){
 
 /*--------- Définition de fonction ---------*/
 
-void afficher(struct Serpent s, int fruit_x, int fruit_y){
+void afficher(struct Serpent s, int fruit_x, int fruit_y, int score){
     clear();    // efface l'ancien affichage
 
     int i;
@@ -149,6 +160,8 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y){
         mvprintw(s.y[i], s.x[i], "o");
     }
 
+    mvprintw(0, LARGEUR + 5, "Score : %d", score);  /*affiche le score en haut*/
+
     refresh();  // On envoie l'affichage à l'écran
 }
 
@@ -161,10 +174,9 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y){
 
 
 /* Ce qu'il reste à faire : 
-        - Le corps du serpent qui se crée [tab x struct]
-        - il ne peux pas faire d'aller-retours
-        - Game over si le serpent se mord lui même
-        - Le score
         - La difficulté(des blocs qui apparaissent à partir de 1000 en score)
         - Le disign
-        - La possibilitée d'utiliser un joystique */
+        - La possibilitée d'utiliser un joystique 
+        - Tableau de tes meilleures scores qui s'affiche 
+        - Faire un ecran d'affichage 
+        - Poser le game over a meme le jeu et pas dans le terminale */
