@@ -174,9 +174,9 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y, int score){
 
 
 /* Ce qu'il reste à faire : 
-        - La difficulté(des blocs qui apparaissent à partir de 1000 en score)
+        - La difficulté(des blocs qui apparaissent à partir de 400 en score)
+        - Tableau de tes meilleures scores qui s'affiche 
         - Le disign
         - La possibilitée d'utiliser un joystique 
-        - Tableau de tes meilleures scores qui s'affiche 
         - Faire un ecran d'affichage 
         - Poser le game over a meme le jeu et pas dans le terminale */
