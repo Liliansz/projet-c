@@ -21,6 +21,9 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y, int score, int bloc_x[
 void ecran_accueil();
 int ecran_game_over(int score, int meilleur_score);
 int bloc(struct Serpent s, int bloc_x[], int bloc_y[], int nb_bloc);
+void initialiser_couleurs();
+int collision_mur(struct Serpent s);
+int collision_corps(struct Serpent s);
 
 
 
@@ -28,6 +31,7 @@ int main(){
     initscr();
     curs_set(0);            // cache le curseur
     nodelay(stdscr, true);  // serpent qui bouge sans attendre une touche
+    initialiser_couleurs();
 
 
     /*---------Variables du serpent ---------*/
@@ -52,7 +56,7 @@ int main(){
         s.x[0] = LARGEUR / 2;
         s.y[0] = HAUTEUR / 2;
 
-        
+    
         int touche;
         int en_jeu = 1;     /* 1 = jeu en cours, 0 = game over */ 
 
@@ -123,7 +127,7 @@ int main(){
             /* Le serpent mange le fruit ? */
             if(s.x[0] == fruit_x && s.y[0] == fruit_y){
                 s.taille++;  /* le serpent grandit */
-                score = score + 10;                     /*on ajoute 10 au score*/
+                score = score + 10;       /*on ajoute 10 au score*/
 
 
                 // Création d'obstacle
@@ -140,22 +144,14 @@ int main(){
             }
 
 
-            /* 4. Collision sur le mur */
-            if(s.x[0] <= 0 || s.x[0] >= LARGEUR || s.y[0] <= 0 || s.y[0] >= HAUTEUR){
-                en_jeu = 0;     /* game over */
+            
+            if(collision_mur(s) || collision_corps(s)){
+              en_jeu = 0; /*game over*/
             }
-
-            /*Collision avec soi-même*/
-            for (int i = 1; i < s.taille; i++){
-                if(s.x[0] == s.x[i] && s.y[0] == s.y[i]){
-                    en_jeu = 0;
-                }
-            }
-
+             
             if(bloc(s, bloc_x, bloc_y, nb_bloc)){
-                en_jeu = 0;
+                en_jeu = 0; /*game over*/
             }
-
 
             /*5. Afficher*/
             if(en_jeu){
@@ -228,9 +224,11 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y, int score, int bloc_x[
     int j; 
 
     /* Mur du haut et du bas */
+    attron(COLOR_PAIR(3) | A_BOLD);
     for(i = 0; i < LARGEUR; i = i + 1){
         mvprintw(0, i, "#");        /* mur du haut */
         mvprintw(HAUTEUR, i, "#");  /* mur du bas */
+        mvprintw(HAUTEUR, LARGEUR, "#");
     }
 
     /* Mur du gauche et de droite */
@@ -238,14 +236,20 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y, int score, int bloc_x[
         mvprintw(i, 0, "#");        /* mur de gauche */
         mvprintw(i, LARGEUR, "#");  /* mur de droite */
     }
+    attroff(COLOR_PAIR(3) | A_BOLD);
 
 
+    attron(COLOR_PAIR(2) | A_BOLD);
     mvprintw(fruit_y, fruit_x, "*");    // Affiche le fruit
+    attroff(COLOR_PAIR(2) | A_BOLD);
 
+    attron(COLOR_PAIR(1) | A_BOLD);
     mvprintw(s.y[0], s.x[0], "O");    // On affiche le serpent
     for(i = 1; i < s.taille; i++){
         mvprintw(s.y[i], s.x[i], "o");
     }
+    attroff(COLOR_PAIR(1) | A_BOLD);
+    
 
     mvprintw(0, LARGEUR + 5, "Score : %d", score);  /*affiche le score en haut*/
 
@@ -266,9 +270,26 @@ int bloc(struct Serpent s, int bloc_x[], int bloc_y[], int nb_blocs){
     return 0; 
 }
 
+void initialiser_couleurs(){
+  start_color();
+  init_pair(1, COLOR_GREEN, COLOR_BLACK);   // couleur du serpent
+  init_pair(2, COLOR_WHITE, COLOR_BLACK);     // couleur du bonbon
+  init_pair(3, COLOR_RED, COLOR_BLACK);     // couleur du murs
+}
 
+int collision_mur(struct Serpent s){
+  if(s.x[0] <= 0 || s.x[0] >= LARGEUR || s.y[0] <= 0 || s.y[0] >= HAUTEUR){
+    return 1;     /* game over, il y a une collision */
+  }
+  return 0;
+}
 
-
-/* Ce qu'il reste à faire : 
-        - Le disign 
-        - La possibilitée d'utiliser un joystique */
+int collision_corps(struct Serpent s){
+  int i;
+  for (i = 1; i < s.taille; i++){
+    if(s.x[0] == s.x[i] && s.y[0] == s.y[i]){
+      return 1;
+    }
+  }
+  return 0;
+}
