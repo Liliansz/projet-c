@@ -1,3 +1,6 @@
+// Je déclare qu'il s'agit de mon propre travail
+
+
 #include <stdio.h>
 #include <ncurses.h>
 #include <unistd.h>    // Pour la vitesse du jeu
@@ -73,6 +76,8 @@ int main(){
         int bloc_x[50];
         int bloc_y[50];
         int nb_bloc = 0;
+        int fruit;
+        int bloc_valide;
 
 
         /*--------- Boucle principale du jeu ---------*/
@@ -132,17 +137,48 @@ int main(){
 
                 // Création d'obstacle
                 if(score >= 250 && nb_bloc < 50){
+                do{
+                    bloc_valide = 1;
                     bloc_x[nb_bloc] = rand() % (LARGEUR - 1) + 1;
                     bloc_y[nb_bloc] = rand() % (HAUTEUR - 1) + 1;
-                    nb_bloc++;
+                    // Vérifier qu'il n'est pas sur le corps
+                    for(int i = 0; i < s.taille; i++){
+                        if(bloc_x[nb_bloc] == s.x[i] && bloc_y[nb_bloc] == s.y[i]){
+                            bloc_valide = 0;
+                        }
+                    }
+                    // Vérifier qu'il n'est pas sur un autre bloc
+                    for(int j = 0; j < nb_bloc; j++){
+                        if(bloc_x[nb_bloc] == bloc_x[j] && bloc_y[nb_bloc] == bloc_y[j]){
+                            bloc_valide = 0;
+                        }
+                    }
+                    // Vérifier qu'il n'est pas sur le fruit
+                    if(bloc_x[nb_bloc] == fruit_x && bloc_y[nb_bloc] == fruit_y){
+                        bloc_valide = 0;
+                    }
+                } while(bloc_valide == 0);
+                nb_bloc++;
                 }
 
 
                 /* Générer un nouveau fruit */
-                fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et donc etre dans le mur */
-                fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
+                do{
+                    fruit = 1;
+                    fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et donc etre dans le mur */
+                    fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
+                    for(int i = 0; i < s.taille; i++){
+                        if(fruit_x == s.x[i] && fruit_y == s.y[i]){
+                            fruit = 0;
+                        }
+                    }
+                    for(int j = 0; j < nb_bloc; j++){
+                        if(fruit_x == bloc_x[j] && fruit_y == bloc_y[j]){
+                            fruit = 0;
+                        }
+                    }
+                } while(fruit == 0);
             }
-
 
             
             if(collision_mur(s) || collision_corps(s)){
@@ -299,8 +335,8 @@ int collision_corps(struct Serpent s){
 
 
 
+
 /* Ce qu'il reste à faire : 
-        - bug : les * apparaissent sans les X
         - appartition d une guepe qui te fait perdre des points
         - Le disign 
         - La possibilitée d'utiliser un joystique */
