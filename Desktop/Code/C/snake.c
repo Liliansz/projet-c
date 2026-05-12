@@ -126,12 +126,12 @@ int main(){
 
             /* Le serpent mange le fruit ? */
             if(s.x[0] == fruit_x && s.y[0] == fruit_y){
-                s.taille++;  /* le serpent grandit */
+                s.taille++ ;  /* le serpent grandit */
                 score = score + 10;       /*on ajoute 10 au score*/
 
 
                 // Création d'obstacle
-                if(score >= 400 && nb_bloc < 50){
+                if(score >= 250 && nb_bloc < 50){
                     bloc_x[nb_bloc] = rand() % (LARGEUR - 1) + 1;
                     bloc_y[nb_bloc] = rand() % (HAUTEUR - 1) + 1;
                     nb_bloc++;
@@ -158,7 +158,7 @@ int main(){
                 afficher(s, fruit_x, fruit_y, score, bloc_x, bloc_y, nb_bloc);
 
                 if(s.direction == 'z' || s.direction == 's'){
-                    usleep(150000); // Pour que le serpent soit plus lent a la verticale
+                    usleep(200000); // Pour que le serpent soit plus lent a la verticale
                 } else{
                     usleep(100000); /* Vitesse du jeu, on attend un peu avant chaque frame*/
                 }
@@ -253,9 +253,11 @@ void afficher(struct Serpent s, int fruit_x, int fruit_y, int score, int bloc_x[
 
     mvprintw(0, LARGEUR + 5, "Score : %d", score);  /*affiche le score en haut*/
 
+    attron(COLOR_PAIR(4) | A_BOLD);
     for(j = 0; j < nb_bloc; j++){
         mvprintw(bloc_y[j], bloc_x[j], "X");
     }
+    attroff(COLOR_PAIR(4) | A_BOLD);
 
     refresh();  // On envoie l'affichage à l'écran
 }
@@ -275,6 +277,7 @@ void initialiser_couleurs(){
   init_pair(1, COLOR_GREEN, COLOR_BLACK);   // couleur du serpent
   init_pair(2, COLOR_WHITE, COLOR_BLACK);     // couleur du bonbon
   init_pair(3, COLOR_RED, COLOR_BLACK);     // couleur du murs
+  init_pair(4, COLOR_YELLOW, COLOR_BLACK);  // couleurs blocs 
 }
 
 int collision_mur(struct Serpent s){
@@ -293,3 +296,11 @@ int collision_corps(struct Serpent s){
   }
   return 0;
 }
+
+
+
+/* Ce qu'il reste à faire : 
+        - bug : les * apparaissent sans les X
+        - appartition d une guepe qui te fait perdre des points
+        - Le disign 
+        - La possibilitée d'utiliser un joystique */
