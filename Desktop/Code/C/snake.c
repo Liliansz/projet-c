@@ -53,38 +53,37 @@ int main(){
     ecran_accueil();
     
     while(rejouer){
-
-        s.taille = 1;
-        s.direction = 'd';
-        s.x[0] = LARGEUR / 2;
-        s.y[0] = HAUTEUR / 2;
-
-    
+        
         int touche;
         int en_jeu = 1;     /* 1 = jeu en cours, 0 = game over */ 
-
-
-        /* Initialisation du générateur aléatoire */
-        srand(time(NULL));
-
-        /* Position du fruit à l'intérieur des murs donc entre 1 et LARGEUR - 1 */
-        int fruit_x = rand() % (LARGEUR - 1) + 1;
-        int fruit_y = rand() % (HAUTEUR - 1) + 1;
-
         int score = 0;
-
         int bloc_x[50];
         int bloc_y[50];
         int nb_bloc = 0;
         int fruit;
         int bloc_valide;
 
+        /* Position du fruit à l'intérieur des murs donc entre 1 et LARGEUR - 1 */
+        int fruit_x = rand() % (LARGEUR - 1) + 1;
+        int fruit_y = rand() % (HAUTEUR - 1) + 1;
+
+
+        /* Position du serpent dans la zone de jeu*/
+        s.taille = 1;
+        s.direction = 'd';
+        s.x[0] = LARGEUR / 2;
+        s.y[0] = HAUTEUR / 2;
+
+
+        /* Initialisation du générateur aléatoire */
+        srand(time(NULL));
+
 
         /*--------- Boucle principale du jeu ---------*/
 
         while(en_jeu){      /* Continue tant que en_jeu vaut 1 */
 
-            /*1. Lire la touche appuyer*/
+            /*Lire la touche appuyer*/
             touche = getch();
 
 
@@ -107,13 +106,13 @@ int main(){
             
 
 
-            /* Déplacement du corps (chaque segment suit le précédent) */
+            /* Déplacement du corps (chaque caractère suit le précédent) */
             for (int i = s.taille - 1; i > 0; i--) {
                 s.x[i] = s.x[i-1];
                 s.y[i] = s.y[i-1];
             }
 
-            /*3. Déplacer le serpent en continu*/
+            /*Déplacer le serpent en continu*/
             if(s.direction == 'z'){
                 s.y[0] = s.y[0] - 1;
             }
@@ -133,6 +132,23 @@ int main(){
             if(s.x[0] == fruit_x && s.y[0] == fruit_y){
                 s.taille++ ;  /* le serpent grandit */
                 score = score + 10;       /*on ajoute 10 au score*/
+
+                /* Générer un nouveau fruit */
+                do{
+                    fruit = 1;
+                    fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et donc etre dans le mur */
+                    fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
+                    for(int i = 0; i < s.taille; i++){
+                        if(fruit_x == s.x[i] && fruit_y == s.y[i]){
+                            fruit = 0;
+                        }
+                    }
+                    for(int j = 0; j < nb_bloc; j++){
+                        if(fruit_x == bloc_x[j] && fruit_y == bloc_y[j]){
+                            fruit = 0;
+                        }
+                    }
+                } while(fruit == 0);
 
 
                 // Création d'obstacle
@@ -160,27 +176,10 @@ int main(){
                 } while(bloc_valide == 0);
                 nb_bloc++;
                 }
-
-
-                /* Générer un nouveau fruit */
-                do{
-                    fruit = 1;
-                    fruit_x = rand() % (LARGEUR - 1) + 1;   /* +1 pour eviter d'etre dans 0 et donc etre dans le mur */
-                    fruit_y = rand() % (HAUTEUR - 1) + 1;   /* +1 pour eviter d etre dans 0 et donc etre dans le mur */
-                    for(int i = 0; i < s.taille; i++){
-                        if(fruit_x == s.x[i] && fruit_y == s.y[i]){
-                            fruit = 0;
-                        }
-                    }
-                    for(int j = 0; j < nb_bloc; j++){
-                        if(fruit_x == bloc_x[j] && fruit_y == bloc_y[j]){
-                            fruit = 0;
-                        }
-                    }
-                } while(fruit == 0);
             }
 
-            
+
+            /*Conditions de perte*/
             if(collision_mur(s) || collision_corps(s)){
               en_jeu = 0; /*game over*/
             }
@@ -189,10 +188,11 @@ int main(){
                 en_jeu = 0; /*game over*/
             }
 
-            /*5. Afficher*/
+            /*5. Affichage*/
             if(en_jeu){
                 afficher(s, fruit_x, fruit_y, score, bloc_x, bloc_y, nb_bloc);
 
+                // Vitesse du serpent
                 if(s.direction == 'z' || s.direction == 's'){
                     usleep(200000); // Pour que le serpent soit plus lent a la verticale
                 } else{
@@ -201,6 +201,8 @@ int main(){
             }
         }
 
+
+        // Garde le meilleur score entre les parties
         if(score > meilleur_score){
             meilleur_score = score;
         }
@@ -332,11 +334,3 @@ int collision_corps(struct Serpent s){
   }
   return 0;
 }
-
-
-
-
-/* Ce qu'il reste à faire : 
-        - appartition d une guepe qui te fait perdre des points
-        - Le disign 
-        - La possibilitée d'utiliser un joystique */
